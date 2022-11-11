@@ -2,6 +2,8 @@
 
 import sys
 from random import choice
+import discord
+import os
 
 
 def open_and_read_file(filenames):
@@ -64,3 +66,27 @@ text = open_and_read_file(filenames)
 
 # Get a Markov chain
 chains = make_chains(text)
+
+
+"""Building the logic of the discord bot"""
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'We have logged in as {client.user}')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    #print(message.content)
+    dict_to_return = make_chains(message.content)
+    message_to_return = make_text(dict_to_return)
+    await message.channel.send(message_to_return)
+
+client.run(os.environ['DISCORD_TOKEN'])
